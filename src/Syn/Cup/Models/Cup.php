@@ -160,6 +160,11 @@ class Cup extends Model
 		return $vm->destroyDuration() * ($this -> teams -> count() / 2);
 	}
 
+	public function getVmInstantiationAtAttribute()
+	{
+		return $this -> starts_at -> subSeconds($this -> vmCreateDuration);
+	}
+
 	/**
 	 * Rounds in Cup
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -185,7 +190,7 @@ class Cup extends Model
 
 	public function getClosesAtAttribute($value)
 	{
-		return empty($value) || $value == '0000-00-00 00:00:00' ? $this -> starts_at -> subSeconds($this -> vmCreateDuration) : new Carbon($value);
+		return empty($value) || $value == '0000-00-00 00:00:00' ? $this -> vmInstantiationAt : new Carbon($value);
 	}
 
 	public function allowDelete()

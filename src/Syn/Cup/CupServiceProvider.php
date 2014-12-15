@@ -26,6 +26,7 @@ class CupServiceProvider extends ServiceProvider {
 
 		Member::observe(new Observers\MemberObserver);
 		Team::observe(new Observers\TeamObserver);
+		Cup::observe(new Observers\CupObserver);
 
 		$this->app->bindIf('command.syn.cup.progress', function ($app) {
 			return new Scheduled\CupProgressScheduled();

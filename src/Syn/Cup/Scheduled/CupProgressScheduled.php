@@ -26,21 +26,34 @@ class CupProgressScheduled extends ScheduledCommand
 			$this -> info("#{$i}: {$cup->name}");
 
 			/**
-			 * Loop through all open matches
+			 * Loop through all started, open matches
 			 * - approve them if possible
 			 */
 			foreach($cup->matches()
+				->whereNotNull('started_at')
 				->whereNull('approved_at')
 				->get() as $match
 			)
 			{
-				$this->info("#{$i}: match {$match->id} between team Id's: ". implode(", ", $match->competitors->lists('participant_team_id')));
+				$this->info("#{$i}: started match {$match->id} between team Id's: ". implode(", ", $match->competitors->lists('participant_team_id')));
 				// if scores by all players are entered, do something
 				$approved = $this->attemptMatchApproval($match, $cup);
 				// if longer than x minutes after finishing match, do something
 
 				// if match is "lost"; takes longer than expected max match time, do something
 
+			}
+			/**
+			 * closes_at reached
+			 * - no new teams can sign up
+			 * - decide whether enough teams signed up
+			 * -
+			 */
+			// not enough teams entered, erase cup, notify?
+			if($cup->closes_at <= Carbon::now() && $cup -> teams -> count() < $cup -> teams_min)
+			{
+				$cup -> delete();
+				continue;
 			}
 			/**
 			 * starts_at reached

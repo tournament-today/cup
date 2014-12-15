@@ -16,11 +16,22 @@ class CupController extends Controller
 {
 	public $icon = 'cup';
 
+	/**
+	 * Creates controller instance
+	 *
+	 * @param CupRepositoryInterface $cup
+	 */
 	public function __construct(CupRepositoryInterface $cup)
 	{
 		$this -> cup = $cup;
 	}
 
+	/**
+	 * Edit cup
+	 *
+	 * @param Cup $cup
+	 * @return mixed
+	 */
 	public function edit(Cup $cup = null)
 	{
 		if(!$cup)
@@ -34,6 +45,13 @@ class CupController extends Controller
 			?: $this -> view('pages.form', ['model' => $cup]);
 	}
 
+	/**
+	 * Show cup
+	 *
+	 * @param Cup  $cup
+	 * @param null $name
+	 * @return mixed
+	 */
 	public function show(Cup $cup, $name = null)
 	{
 		$this -> title = $cup -> name;
@@ -94,6 +112,12 @@ class CupController extends Controller
 		}) ?: $this -> view('pages.cup.show', compact('cup','teamSignUp'));
 	}
 
+
+	/**
+	 * List of all cups
+	 *
+	 * @return mixed
+	 */
 	public function index()
 	{
 		$this -> title = trans_choice('cup.cup',2);
@@ -101,6 +125,13 @@ class CupController extends Controller
 		return $this -> view('pages.cup.index', compact('models'));
 	}
 
+	/**
+	 * Show list of cups per gamer
+	 *
+	 * @param Gamer $gamer
+	 * @param null  $name
+	 * @return mixed
+	 */
 	public function gamerIndex(Gamer $gamer, $name = null)
 	{
 		if($this->getVisitor()->id != $gamer->id && !$this->getVisitor()->admin)
@@ -113,6 +144,16 @@ class CupController extends Controller
 	}
 
 
+	/**
+	 * Set team to join cup
+	 *
+	 * @param $cup
+	 * @param $cupName
+	 * @param $team
+	 * @param $teamName
+	 * @return mixed
+	 * @throws \Syn\Framework\Exceptions\UnexpectedResultException
+	 */
 	public function joinTeam($cup, $cupName, $team, $teamName)
 	{
 
