@@ -148,6 +148,18 @@ class Cup extends Model
 		return $this -> hasManyThrough(__NAMESPACE__.'\Participant\Team\Member', __NAMESPACE__.'\Participant\Team', 'cup_id', 'participant_team_id');
 	}
 
+	public function getVmCreateDurationAttribute()
+	{
+		$vm = App::make('vm.instance');
+		return $vm->createDuration() * ($this -> teams -> count() / 2);
+	}
+
+	public function getVmDestroyDurationAttribute()
+	{
+		$vm = App::make('vm.instance');
+		return $vm->destroyDuration() * ($this -> teams -> count() / 2);
+	}
+
 	/**
 	 * Rounds in Cup
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -171,14 +183,9 @@ class Cup extends Model
 		return $this -> belongsTo(__NAMESPACE__.'\CompetitionType', 'competition_type_id');
 	}
 
-	/**
-	 * Transfers db value to Carbon
-	 * @param $value
-	 * @return Carbon
-	 */
-	public function getStartsAtAttribute($value)
+	public function getClosesAtAttribute($value)
 	{
-		return new Carbon($value);
+		return empty($value) || $value == '0000-00-00 00:00:00' ? $this -> starts_at -> subSeconds($this -> vmCreateDuration) : new Carbon($value);
 	}
 
 	public function allowDelete()
@@ -211,7 +218,7 @@ class Cup extends Model
 			// cup is still open for sign ups, close at moment not reached
 			(empty($this -> closes_at) ? $this->closes_at > Carbon::now() : $this->starts_at > Carbon::now())
 			// there are still slots open (TODO remove from code with flexible slots)
-			&& $this -> teams -> count() < (int) $this -> teams_max
+			&& ($this -> teams_max ? $this -> teams -> count() < (int) $this -> teams_max : true)
 			// user cannot participate if already participating
 			&& !$this -> visitorParticipates;
 	}

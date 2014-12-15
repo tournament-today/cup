@@ -18,6 +18,7 @@ class CupProgressScheduled extends ScheduledCommand
 	public function fire()
 	{
 		$repo = App::make('Syn\Cup\Interfaces\CupRepositoryInterface');
+		// loads all cups that start within the hour
 		$cups = $repo->findNeedAttention();
 
 		foreach($cups as $i => $cup)
