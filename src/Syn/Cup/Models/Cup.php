@@ -4,7 +4,6 @@ use App;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletingTrait;
-use Illuminate\Support\Collection;
 use Syn\Cup\Classes\RoundIterator;
 use Syn\Framework\Abstracts\Model;
 use Syn\Framework\Exceptions\MissingMethodException;
@@ -33,8 +32,8 @@ class Cup extends Model
 		'starts_at' => ['required', 'date'],
 		'closes_at' => ['date'],
 		'team_size' => ['integer', 'min:1', 'max:10'],
-		'teams_max' => ['integer', 'min:2', 'max:128'],
 		'teams_min' => ['integer', 'min:2', 'max:128'],
+		'teams_max' => ['integer', 'min:2'],
 		'days' => ['integer', 'min:1', 'max: 30', 'disabled'],
 		'play_weekdays' => ['boolean', 'required_without:play_weekends'],
 		'play_weekends' => ['boolean', 'required_without:play_weekdays'],
@@ -61,8 +60,8 @@ class Cup extends Model
 		'starts_at' => 'datetime',
 		'closes_at' => 'datetime',
 		'team_size' => 'slider',
-		'teams_max' => 'slider',
 		'teams_min' => 'slider',
+		'teams_max' => 'text',
 		'days' => 'slider',
 		'play_weekdays' => 'toggle',
 		'play_weekends' => 'toggle',

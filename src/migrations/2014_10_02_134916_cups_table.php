@@ -31,7 +31,7 @@ class CupsTable extends Migration {
 
 			$table -> timestamp('starts_at') -> nullable();
 			$table -> integer('team_size');
-			$table -> integer('teams_max');
+			$table -> integer('teams_max') -> nullable();
 			$table -> integer('teams_min');
 			$table -> integer('days') -> default(1);
 
