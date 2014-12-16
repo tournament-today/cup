@@ -30,14 +30,17 @@ class CupProgressScheduled extends ScheduledCommand
 			 * - approve them if possible
 			 */
 			foreach($cup->matches()
+				// must be started
 				->whereNotNull('started_at')
+				// must not have been approved
 				->whereNull('approved_at')
 				->get() as $match
 			)
 			{
 				$this->info("#{$i}: started match {$match->id} between team Id's: ". implode(", ", $match->competitors->lists('participant_team_id')));
 				// if scores by all players are entered, do something
-				$approved = $this->attemptMatchApproval($match, $cup);
+				if($this->attemptMatchApproval($match, $cup))
+					continue;
 				// if longer than x minutes after finishing match, do something
 
 				// if match is "lost"; takes longer than expected max match time, do something
@@ -47,12 +50,20 @@ class CupProgressScheduled extends ScheduledCommand
 			 * closes_at reached
 			 * - no new teams can sign up
 			 * - decide whether enough teams signed up
-			 * -
 			 */
 			// not enough teams entered, erase cup, notify?
 			if($cup->closes_at <= Carbon::now() && $cup -> teams -> count() < $cup -> teams_min)
 			{
 				$cup -> delete();
+				continue;
+			}
+			/**
+			 * vmInstantiationAt reached
+			 * - vms not yet deploying
+			 */
+			if($cup->vmInstantiationAt <= Carbon::now() && $cup->uninstantiatedVms->count() > 0)
+			{
+				$this->call('vm:schedule', ['--instantiate', '--cup' => $cup->id]);
 				continue;
 			}
 			/**

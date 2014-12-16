@@ -2,6 +2,7 @@
 
 use Illuminate\Support\ServiceProvider;
 use Syn\Cup\Models\Cup;
+use Syn\Cup\Models\Match;
 use Syn\Cup\Models\Participant\Team;
 use Syn\Cup\Models\Participant\Team\Member;
 use Syn\Cup\Repositories\CupRepository;
@@ -27,6 +28,7 @@ class CupServiceProvider extends ServiceProvider {
 		Member::observe(new Observers\MemberObserver);
 		Team::observe(new Observers\TeamObserver);
 		Cup::observe(new Observers\CupObserver);
+		Match::observe(new Observers\MatchObserver);
 
 		$this->app->bindIf('command.syn.cup.progress', function ($app) {
 			return new Scheduled\CupProgressScheduled();

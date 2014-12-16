@@ -98,6 +98,18 @@ class Cup extends Model
 	public function getDates() { return ['starts_at', 'closes_at']; }
 
 	/**
+	 * Vms
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function vms()
+	{
+		return $this -> hasMany('Syn\Vm\Models\Vm');
+	}
+	public function getUninstantiatedVmsAttribute()
+	{
+		return $this->vms()->whereNull('deploying_at')->get();
+	}
+	/**
 	 * Clan relation
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
