@@ -13,6 +13,10 @@ class Cup extends Model
 {
 	use SoftDeletingTrait;
 
+	/**
+	 * Validation definition
+	 * @var array
+	 */
 	public $_validation = [
 		'clan_id' => ['required', 'exists:clans,id'],
 		'gamer_id' => ['required', 'exists:gamers,id'],
@@ -41,6 +45,10 @@ class Cup extends Model
 		'daily_play_time_ends' => ['time'],
 	];
 
+	/**
+	 * Type definition
+	 * @var array
+	 */
 	public $_types = [
 		'gamer_id' => 'Visitor.id',
 		'name' => 'text',
@@ -69,12 +77,20 @@ class Cup extends Model
 		'daily_play_time_ends' => 'time',
 	];
 
+	/**
+	 * Loads the following methods for select input values
+	 * @var array
+	 */
 	public $_select_values = [
 		'steam_game_id' => ['Syn\Steam\Models\SteamGame', 'selectable'],
 		'competition_type_id' => ['Syn\Cup\Models\CompetitionType', 'all'],
 		'clan_id' => ['Visitor', 'clans'],
 	];
 
+	/**
+	 * Appended attributes for model
+	 * @var array
+	 */
 	protected $appends = [
 		'upcoming',
 	];
@@ -129,11 +145,19 @@ class Cup extends Model
 		return !empty($winners) ? $this->teams()->whereIn($winners)->get() : [];
 	}
 
+	/**
+	 * Loads the Round Iterator instance
+	 * @return RoundIterator
+	 */
 	public function getIteratorAttribute()
 	{
 		return new RoundIterator($this->rounds);
 	}
 
+	/**
+	 * @param int $round
+	 * @throws \Syn\Framework\Exceptions\MissingMethodException
+	 */
 	public function byeTeam($round = 2)
 	{
 		throw new MissingMethodException('Not yet configured');
@@ -148,21 +172,33 @@ class Cup extends Model
 		return $this -> hasManyThrough(__NAMESPACE__.'\Participant\Team\Member', __NAMESPACE__.'\Participant\Team', 'cup_id', 'participant_team_id');
 	}
 
+	/**
+	 * Calculates the average duration to instantiate all necessary machines based on Vm Provider
+	 * @return int
+	 */
 	public function getVmCreateDurationAttribute()
 	{
 		$vm = App::make('vm.instance');
 		return $vm->createDuration() * ($this -> teams -> count() / 2);
 	}
 
+	/**
+	 * Calculate the average duration to destroy all instantiated machines
+	 * @return int
+	 */
 	public function getVmDestroyDurationAttribute()
 	{
 		$vm = App::make('vm.instance');
 		return $vm->destroyDuration() * ($this -> teams -> count() / 2);
 	}
 
+	/**
+	 * When to start instantiation
+	 * @return mixed
+	 */
 	public function getVmInstantiationAtAttribute()
 	{
-		return $this -> starts_at -> subSeconds($this -> vmCreateDuration);
+		return $this -> starts_at -> subSecond($this -> vmCreateDuration);
 	}
 
 	/**
@@ -183,28 +219,59 @@ class Cup extends Model
 		return $this -> hasManyThrough(__NAMESPACE__.'\Match', __NAMESPACE__.'\Round');
 	}
 
+	/**
+	 * Competition type
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
 	public function type()
 	{
 		return $this -> belongsTo(__NAMESPACE__.'\CompetitionType', 'competition_type_id');
 	}
 
+	/**
+	 * closes_at ; if null will use calculated closure time
+	 * @param $value
+	 * @return Carbon|mixed|null
+	 */
 	public function getClosesAtAttribute($value)
 	{
-		return empty($value) || $value == '0000-00-00 00:00:00' ? $this -> vmInstantiationAt : new Carbon($value);
+		return empty($value) || $value == '0000-00-00 00:00:00'
+			? ($this -> starts_at ? $this -> vmInstantiationAt : null)
+			: new Carbon($value);
 	}
 
+	/**
+	 * Whether visitor is allowed to Delete
+	 * @return bool
+	 */
 	public function allowDelete()
 	{
 		return $this -> allowCreate() && $this -> started_at < Carbon::now();
 	}
+
+
+	/**
+	 * Whether visitor is allowed to Create
+	 * @return bool
+	 */
 	public function allowCreate()
 	{
 		return Auth::check() && Auth::user()->admin;
 	}
+
+	/**
+	 * Whether visitor is allowed to Edit
+	 * @return bool
+	 */
 	public function allowEdit()
 	{
-		return $this -> allowCreate();
+		return $this->teams->count() == 0 && $this -> allowCreate();
 	}
+
+	/**
+	 * Whether the cup is in the future
+	 * @return mixed
+	 */
 	public function getUpcomingAttribute()
 	{
 		return $this -> starts_at -> isFuture();
