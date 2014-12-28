@@ -44,7 +44,7 @@ class EliminationTypesTable extends Migration {
 			 * General settings
 			 */
 			// when amount of teams is not of power 2, allow the additional team to have a bye
-			$table -> integer('bye_enabled') -> nullable();
+			$table -> boolean('bye_enabled') -> default(true);
 			$table -> boolean('selectable') -> default(true);
 			$table -> boolean('admin_only') -> default(false);
 

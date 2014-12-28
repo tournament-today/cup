@@ -50,6 +50,7 @@ class CupProgressScheduled extends ScheduledCommand
 			 * closes_at reached
 			 * - no new teams can sign up
 			 * - decide whether enough teams signed up
+			 * - remove teams with unapproved players
 			 */
 			// not enough teams entered, erase cup, notify?
 			if($cup->closes_at <= Carbon::now() && $cup -> teams -> count() < $cup -> teams_min)
